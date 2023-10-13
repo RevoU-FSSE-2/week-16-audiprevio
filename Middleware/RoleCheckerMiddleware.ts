@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { User } from '@prisma/client';
+import redis from "ioredis";
 
 export const checkAdminOrDirector = (req: Request, res: Response, next: NextFunction) => {
     const user = (req as Request & { user: User }).user;

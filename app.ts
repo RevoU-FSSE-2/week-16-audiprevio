@@ -9,6 +9,7 @@ import { loginUser } from './Controller/mainController';
 import PermissionMiddleware from './Permissions/Permissions';
 import { checkAdminOrDirector } from './Middleware/RoleCheckerMiddleware';
 import { loginLimiter } from './Middleware/LimiterMiddleware';
+import { lockoutMiddleware } from './Middleware/LockoutMiddleware';
 
 
 const app = express();
@@ -44,7 +45,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', loginLimiter, async (req, res) => {
+app.post('/login', lockoutMiddleware, loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const tokens = await loginUser(email, password);
@@ -223,22 +224,20 @@ app.delete('/event/:id', async (req, res) => {
   }
 
   try {
-    // Delete the associated attendees
     await prisma.attendee.deleteMany({
       where: { eventId: Number(req.params.id) },
     });
 
-    // Then delete the event
     await prisma.event.delete({
       where: { id: Number(req.params.id) },
     });
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
-    console.error(error); // Log the error
+    console.error(error); 
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message }); // Send the actual error message if error is an instance of Error
+      res.status(500).json({ error: error.message }); 
     } else {
-      res.status(500).json({ error: 'An error occurred while deleting the event' }); // Send a generic error message otherwise
+      res.status(500).json({ error: 'An error occurred while deleting the event' }); 
     }
   }
 });

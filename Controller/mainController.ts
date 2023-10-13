@@ -1,6 +1,7 @@
 import { PrismaClient, User, Event, Attendee, Payroll } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import redis from '../redis';
 
 export const prisma = new PrismaClient();
 
@@ -20,16 +21,32 @@ export const getUserEvents = async (userId: number): Promise<Event[]> => {
 
 export const loginUser = async (email: string, password: string) => {
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const lockUntil = await new Promise<number | null>((resolve, reject) => {
+    redis.get(email, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result ? Number(result) : null);
+      }
+    });
+  });
+
+  if (lockUntil && Date.now() < lockUntil) {
+    throw new Error('You are currently locked out. Please try again later.');
+  }
+
+  let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw new Error('Invalid email or password');
   }
 
-
-  const isPasswordValid = await bcryptjs.compare(password, user.password);
+  let isPasswordValid = await bcryptjs.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error('Invalid email or password');
   }
+
+  // Removed the redeclaration of 'user' and 'isPasswordValid' here
+
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     throw new Error('JWT_SECRET is not set');
