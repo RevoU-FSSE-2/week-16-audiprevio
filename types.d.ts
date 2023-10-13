@@ -8,6 +8,7 @@ declare module 'express-serve-static-core' {
 declare namespace Express {
     export interface Request {
       user?: User;
+      loginFailed?: boolean;
     }
   }
   

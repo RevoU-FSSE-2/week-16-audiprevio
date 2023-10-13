@@ -1,4 +1,5 @@
-import express from 'express';
+import { rateLimit } from 'express-rate-limit';
+import express, { Response,  NextFunction } from 'express';
 import bcryptjs from 'bcryptjs';
 import cookieParser from 'cookie-parser';
 import { User } from '@prisma/client';
@@ -9,8 +10,13 @@ import { loginUser } from './Controller/mainController';
 import PermissionMiddleware from './Permissions/Permissions';
 import { checkAdminOrDirector } from './Middleware/RoleCheckerMiddleware';
 import { loginLimiter } from './Middleware/LimiterMiddleware';
-import { lockoutMiddleware } from './Middleware/LockoutMiddleware';
+import { lockoutingMiddleware } from './Middleware/LockoutMiddleware';
+import { Request } from 'express';
+import asyncHandler from 'express-async-handler';
 
+interface CustomRequest extends Request {
+  loginFailed?: boolean;
+}
 
 const app = express();
 
@@ -20,6 +26,25 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+
+app.post('/login', asyncHandler(async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
+    const tokens = await loginUser(req, res, email, password);
+
+    res.cookie('access_token', tokens.accessToken, { maxAge: 15 * 60 * 1000 });
+    res.cookie('refresh_token', tokens.refreshToken, { maxAge: 7 * 60 * 60 * 1000});
+
+    res.json(tokens);
+  } catch (error) {
+    if (res.locals.loginFailed) {
+      lockoutingMiddleware(req, res, next);
+    } else {
+      const message = (error instanceof Error) ? error.message: 'An unexpected error has occured'
+      res.status(400).json({ error: message });
+    }
+  }
+}));
 
 app.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -45,20 +70,25 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', lockoutMiddleware, loginLimiter, async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const tokens = await loginUser(email, password);
+// app.post('/login', lockoutMiddleware, loginLimiter, async (req: CustomRequest, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const tokens = await loginUser(req, email, password);
 
-    res.cookie('access_token', tokens.accessToken, { maxAge: 15 * 60 * 1000 });
-    res.cookie('refresh_token', tokens.refreshToken, { maxAge: 7 * 60 * 60 * 1000});
+//     res.cookie('access_token', tokens.accessToken, { maxAge: 15 * 60 * 1000 });
+//     res.cookie('refresh_token', tokens.refreshToken, { maxAge: 7 * 60 * 60 * 1000});
 
-    res.json(tokens);
-  } catch (error) {
-    const message = (error instanceof Error) ? error.message: 'An unexpected error has occured'
-    res.status(400).json({ error: message });
-  }
-});
+//     res.json(tokens);
+//   } catch (error) {
+//     const message = (error instanceof Error) ? error.message: 'An unexpected error has occured'
+    
+//     // If the login attempt failed, add a property to the req object
+//     req.loginFailed = true;
+
+//     res.status(400).json({ error: message });
+//   }
+// });
+
 
 app.post('/request-password-reset', async (req, res) => {
   try {

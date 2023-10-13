@@ -2,6 +2,12 @@ import { PrismaClient, User, Event, Attendee, Payroll } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import redis from '../redis';
+import Express from 'express';
+import { Request, Response } from 'express';
+
+interface CustomRequest extends Request {
+  loginFailed?: boolean;
+}
 
 export const prisma = new PrismaClient();
 
@@ -19,7 +25,7 @@ export const getUserEvents = async (userId: number): Promise<Event[]> => {
 
 
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (req: CustomRequest, res: Response, email: string, password: string) => {
 
   const lockUntil = await new Promise<number | null>((resolve, reject) => {
     redis.get(email, (err, result) => {
@@ -42,10 +48,10 @@ export const loginUser = async (email: string, password: string) => {
 
   let isPasswordValid = await bcryptjs.compare(password, user.password);
   if (!isPasswordValid) {
+    res.locals.loginFailed = true;
+    console.log('Login failed:', res.locals.loginFailed);
     throw new Error('Invalid email or password');
   }
-
-  // Removed the redeclaration of 'user' and 'isPasswordValid' here
 
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {

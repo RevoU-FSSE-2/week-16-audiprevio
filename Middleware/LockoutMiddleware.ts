@@ -1,37 +1,45 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from "@prisma/client";
-import Redis from "ioredis";
+import redis from '../redis';
 const prisma = new PrismaClient();
-const redis = new Redis();
+interface CustomRequest extends Request {
+    loginFailed?: boolean;
+  }
 
-export const lockoutMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  export const lockoutingMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
     const { email } = req.body;
   
-    redis.get(email, (err: Error | null | undefined, lockUntil: string | null | undefined) => {
+    console.log('Lockout middleware called');
+  
+    // Check if the user is locked out
+    redis.get(email, (err, lockoutTime) => {
       if (err) {
-        return next(err);
+        return res.status(500).json({ error: 'An error occurred while checking the lockout status' });
       }
   
-      if (lockUntil && Date.now() < Number(lockUntil)) {
-        return res.status(403).json({ error: 'You are currently locked out. Please try again later.' });
+      console.log('Lockout time:', lockoutTime);
+  
+      if (lockoutTime && Date.now() < Number(lockoutTime)) {
+        // The user is locked out, return an error response
+        return res.status(429).json({ error: 'Too many failed login attempts, please try again later' });
       }
   
-      // If user failed to login, increment the attempt count in Redis.
-      redis.incr(`${email}:attempts`, (err, attempts) => {
-        if (err) {
-          return next(err);
-        }
+      // If the login attempt failed, increment the attempt count in Redis and set the lockout time if necessary
+      if (res.locals.loginFailed) {
+        redis.incr(`${email}:attempts`, (err, attempts) => {
+          if (err) {
+            console.log('Error incrementing attempt count:', err);
+            return res.status(500).json({ error: 'An error occurred while incrementing the attempt count' });
+          }
   
-        // Check if attempts is defined
-        if (attempts) {
-          // If the user has failed to login 5 times, set lockout time in Redis.
-          // Here 300 is the lockout duration in seconds (5 minutes).
-          if (attempts > 5) {
+          console.log('Attempt count:', attempts);
+  
+          if (attempts && attempts > 2) {
             redis.set(email, Date.now() + 300 * 1000);
           }
-        }
   
-        next();
-      });
+          return res.status(400).json({ error: 'Invalid email or password' });
+        });
+      }
     });
   };
