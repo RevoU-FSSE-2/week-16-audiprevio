@@ -16,8 +16,10 @@ SAVEMEET is a calendar application that helps you estimate the cost of your meet
 ### NOTICE: LIMITER & LOCKOUT IS ACTIVE AND FAILED/ABUSE IN LOG IN WILL IMPACT YOUR ACCOUNT
 
 <hr>
+
 ## Deployment
 SAVEMEET is deployed using Railway.
+
 <hr>
 
 ## Table of Contents
