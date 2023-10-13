@@ -1,19 +1,26 @@
 # SAVEMEET - A Calendar App for Cost-Savvy Companies
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) 
-
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB) 
-
-SAVEMEET is a calendar application that helps you estimate the cost of your meetings based on the hourly rates of attendees. This README provides an overview of the project and how to set it up for your own use or contribute to its development.
+![image](https://github.com/RevoU-FSSE-2/week-16-audiprevio/assets/126348614/9cffbb5f-a127-48f4-a2ea-d4614149f125)
+<br>
+<i> What the Savemeet front-end will look like (hopefully) </i>
 
 ## Tech Stack
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB) 
+<hr>
+
+## About
+SAVEMEET is a calendar application that helps you estimate the cost of your meetings based on the hourly rates of attendees. This README provides an overview of the project and how to set it up for your own use or contribute to its development.
+
+### Use this Postman for extensive API Doc: https://documenter.getpostman.com/view/29021316/2s9YR56uhH
+
+### NOTICE: LIMITER & LOCKOUT IS ACTIVE AND FAILED/ABUSE IN LOG IN WILL IMPACT YOUR ACCOUNT
 
 ## Deployment
 SAVEMEET is deployed using Railway.
 
 ## Table of Contents
 
-1\. [Prerequisites](Prerequisites)
+1\. [Prerequisites]
 
 2\. [Installation]
 
