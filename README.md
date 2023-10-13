@@ -13,7 +13,7 @@ SAVEMEET is a calendar application that helps you estimate the cost of your meet
 
 ### Use this Postman for extensive API Doc: https://documenter.getpostman.com/view/29021316/2s9YR56uhH
 
-### NOTICE: LIMITER & LOCKOUT IS ACTIVE AND FAILED/ABUSE IN LOG IN WILL IMPACT YOUR ACCOUNT
+#### NOTICE: LIMITER & LOCKOUT IS ACTIVE THUS FAILED/ABUSE IN LOG IN WILL IMPACT YOUR ACCOUNT
 
 <hr>
 
